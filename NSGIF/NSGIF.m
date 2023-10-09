@@ -73,7 +73,7 @@
 
 }
 
-+ (void)createGIFfromURL:(NSURL*)videoURL framesPerSecond:(int)framesPerSecond delayTime:(float)delayTime loopCount:(int)loopCount GIFSize:(NSGIFSize)GIFSize completion:(void(^)(NSURL *GifURL))completionBlock {
++ (void)createGIFfromURL:(NSURL*)videoURL framesPerSecond:(int)framesPerSecond maxFrames:(int)maxFrames delayTime:(float)delayTime loopCount:(int)loopCount GIFSize:(NSGIFSize)GIFSize completion:(void(^)(NSURL *GifURL))completionBlock {
 
     // Convert the video at the given URL to a GIF, and return the GIF's URL if it was created.
     // The frames are spaced evenly over the video, and each has the same duration.
@@ -89,7 +89,10 @@
     // Get the length of the video in seconds
     float videoLength = (float)asset.duration.value/asset.duration.timescale;
     int frameCount = videoLength*framesPerSecond;
-
+    if (frameCount > maxFrames) {
+        frameCount = maxFrames;
+        framesPerSecond = (int)(frameCount /videoLength);
+    }
     
     // How far along the video track we want to move, in seconds.
     float increment = (float)videoLength/frameCount;
