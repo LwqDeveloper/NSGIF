@@ -118,7 +118,24 @@
         // Return GIF URL
         completionBlock(gifURL);
     });
+}
+
++ (NSGIFSize)recommendGIFSizefromURL:(NSURL*)videoURL {
+    AVURLAsset *asset = [AVURLAsset assetWithURL:videoURL];
+    float videoWidth = [[[asset tracksWithMediaType:AVMediaTypeVideo] objectAtIndex:0] naturalSize].width;
+    float videoHeight = [[[asset tracksWithMediaType:AVMediaTypeVideo] objectAtIndex:0] naturalSize].height;
     
+    NSGIFSize optimalSize = NSGIFSizeMedium;
+    if (videoWidth >= 1200 || videoHeight >= 1200)
+        optimalSize = NSGIFSizeVeryLow;
+    else if (videoWidth >= 800 || videoHeight >= 800)
+        optimalSize = NSGIFSizeLow;
+    else if (videoWidth >= 400 || videoHeight >= 400)
+        optimalSize = NSGIFSizeMedium;
+    else if (videoWidth < 400|| videoHeight < 400)
+        optimalSize = NSGIFSizeHigh;
+    
+    return optimalSize;
 }
 
 #pragma mark - Base methods

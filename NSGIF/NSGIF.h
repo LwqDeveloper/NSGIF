@@ -31,4 +31,6 @@ typedef NS_ENUM(NSInteger, NSGIFSize) {
 
 + (void)createGIFfromURL:(NSURL*)videoURL framesPerSecond:(int)framesPerSecond delayTime:(float)delayTime loopCount:(int)loopCount GIFSize:(NSGIFSize)GIFSize completion:(void(^)(NSURL *GifURL))completionBlock;
 
++ (NSGIFSize)recommendGIFSizefromURL:(NSURL*)videoURL;
+
 @end
