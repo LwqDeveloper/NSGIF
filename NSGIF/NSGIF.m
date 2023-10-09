@@ -13,14 +13,6 @@
 #define timeInterval @(600)
 #define tolerance    @(0.01)
 
-typedef NS_ENUM(NSInteger, GIFSize) {
-    GIFSizeVeryLow  = 2,
-    GIFSizeLow      = 3,
-    GIFSizeMedium   = 5,
-    GIFSizeHigh     = 7,
-    GIFSizeOriginal = 10
-};
-
 #pragma mark - Public methods
 
 + (void)optimalGIFfromURL:(NSURL*)videoURL loopCount:(int)loopCount completion:(void(^)(NSURL *GifURL))completionBlock {
@@ -36,15 +28,15 @@ typedef NS_ENUM(NSInteger, GIFSize) {
     float videoWidth = [[[asset tracksWithMediaType:AVMediaTypeVideo] objectAtIndex:0] naturalSize].width;
     float videoHeight = [[[asset tracksWithMediaType:AVMediaTypeVideo] objectAtIndex:0] naturalSize].height;
     
-    GIFSize optimalSize = GIFSizeMedium;
+    NSGIFSize optimalSize = NSGIFSizeMedium;
     if (videoWidth >= 1200 || videoHeight >= 1200)
-        optimalSize = GIFSizeVeryLow;
+        optimalSize = NSGIFSizeVeryLow;
     else if (videoWidth >= 800 || videoHeight >= 800)
-        optimalSize = GIFSizeLow;
+        optimalSize = NSGIFSizeLow;
     else if (videoWidth >= 400 || videoHeight >= 400)
-        optimalSize = GIFSizeMedium;
+        optimalSize = NSGIFSizeMedium;
     else if (videoWidth < 400|| videoHeight < 400)
-        optimalSize = GIFSizeHigh;
+        optimalSize = NSGIFSizeHigh;
     
     // Get the length of the video in seconds
     float videoLength = (float)asset.duration.value/asset.duration.timescale;
@@ -81,8 +73,8 @@ typedef NS_ENUM(NSInteger, GIFSize) {
 
 }
 
-+ (void)createGIFfromURL:(NSURL*)videoURL withFrameCount:(int)frameCount delayTime:(float)delayTime loopCount:(int)loopCount completion:(void(^)(NSURL *GifURL))completionBlock {
-    
++ (void)createGIFfromURL:(NSURL*)videoURL framesPerSecond:(int)framesPerSecond delayTime:(float)delayTime loopCount:(int)loopCount GIFSize:(NSGIFSize)GIFSize completion:(void(^)(NSURL *GifURL))completionBlock {
+
     // Convert the video at the given URL to a GIF, and return the GIF's URL if it was created.
     // The frames are spaced evenly over the video, and each has the same duration.
     // delayTime is the amount of time for each frame in the GIF.
@@ -96,6 +88,8 @@ typedef NS_ENUM(NSInteger, GIFSize) {
 
     // Get the length of the video in seconds
     float videoLength = (float)asset.duration.value/asset.duration.timescale;
+    int frameCount = videoLength*framesPerSecond;
+
     
     // How far along the video track we want to move, in seconds.
     float increment = (float)videoLength/frameCount;
@@ -115,7 +109,7 @@ typedef NS_ENUM(NSInteger, GIFSize) {
     __block NSURL *gifURL;
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         
-        gifURL = [self createGIFforTimePoints:timePoints fromURL:videoURL fileProperties:fileProperties frameProperties:frameProperties frameCount:frameCount gifSize:GIFSizeMedium];
+        gifURL = [self createGIFforTimePoints:timePoints fromURL:videoURL fileProperties:fileProperties frameProperties:frameProperties frameCount:frameCount gifSize:GIFSize];
 
         dispatch_group_leave(gifQueue);
     });
@@ -129,7 +123,7 @@ typedef NS_ENUM(NSInteger, GIFSize) {
 
 #pragma mark - Base methods
 
-+ (NSURL *)createGIFforTimePoints:(NSArray *)timePoints fromURL:(NSURL *)url fileProperties:(NSDictionary *)fileProperties frameProperties:(NSDictionary *)frameProperties frameCount:(int)frameCount gifSize:(GIFSize)gifSize{
++ (NSURL *)createGIFforTimePoints:(NSArray *)timePoints fromURL:(NSURL *)url fileProperties:(NSDictionary *)fileProperties frameProperties:(NSDictionary *)frameProperties frameCount:(int)frameCount gifSize:(NSGIFSize)gifSize{
 	
 	NSString *timeEncodedFileName = [NSString stringWithFormat:@"%@-%lu.gif", fileName, (unsigned long)([[NSDate date] timeIntervalSince1970]*10.0)];
     NSString *temporaryFile = [NSTemporaryDirectory() stringByAppendingString:timeEncodedFileName];
